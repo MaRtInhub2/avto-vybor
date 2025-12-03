@@ -1,5 +1,5 @@
-// Проверка файла
-const express = require('express');
+// ВАШ ИСПРАВЛЕННЫЙ app.js:
+
 const express = require('express');
 const mysql = require('mysql2');
 const bodyParser = require('body-parser');
@@ -15,7 +15,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// ВАЖНО: Раздаем файлы сайта (HTML, CSS, JS) из текущей папки
+// Раздаем статические файлы
 app.use(express.static(__dirname));
 
 // Подключение к базе данных Railway
@@ -47,7 +47,7 @@ app.post('/api/register', (req, res) => {
     db.query(sql, [email, password], (err, result) => {
         if (err) {
             console.error(err);
-            return res.status(500).json({ message: 'Ошибка регистрации (возможно, email занят)' });
+            return res.status(500).json({ message: 'Ошибка регистрации' });
         }
         res.json({ message: 'Успешная регистрация' });
     });
@@ -69,22 +69,19 @@ app.post('/api/login', (req, res) => {
 
 // --- 3. API TRADE-IN ---
 app.post('/api/trade-in', (req, res) => {
-    // Получаем данные из формы
     const { make, model, year, mileage, phone } = req.body;
-    
-    // SQL запрос для сохранения заявки
     const sql = 'INSERT INTO requests (car_brand, car_model, year, mileage, phone) VALUES (?, ?, ?, ?, ?)';
     
     db.query(sql, [make, model, year, mileage, phone], (err, result) => {
         if (err) {
             console.error('Ошибка Trade-In:', err);
-            return res.status(500).json({ error: 'Ошибка сохранения заявки' });
+            return res.status(500).json({ error: 'Ошибка сохранения' });
         }
         res.json({ message: 'Заявка успешно отправлена!' });
     });
 });
 
-// --- 4. API ПРОДУКТОВ (ДЛЯ КАТАЛОГА) ---
+// --- 4. API ПРОДУКТОВ ---
 app.get('/api/products', (req, res) => {
     db.query('SELECT * FROM products', (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -97,7 +94,26 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Все остальные маршруты (для SPA)
+app.get('*', (req, res) => {
+    // Если запрос начинается с /api, вернуть 404
+    if (req.path.startsWith('/api/')) {
+        return res.status(404).json({ error: 'API endpoint not found' });
+    }
+    // Иначе пробуем найти HTML файл
+    const filePath = path.join(__dirname, req.path);
+    const defaultPath = path.join(__dirname, 'index.html');
+    
+    // Проверяем существование файла
+    const fs = require('fs');
+    if (fs.existsSync(filePath) && !fs.statSync(filePath).isDirectory()) {
+        res.sendFile(filePath);
+    } else {
+        res.sendFile(defaultPath);
+    }
+});
+
 // Запуск сервера
 app.listen(port, () => {
-    console.log(`Сервер запущен на порту ${port}`);
+    console.log(`🚀 Сервер запущен на порту ${port}`);
 });
