@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Контакты - АвтоСалон "АвтоВыбор"</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/mobile.css">
+  
+  <script src="js/main.js" defer></script>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-content">
+      <a href="index.html" class="logo">
+        <img src="images/logo.png" alt="Логотип"> <span>АвтоВыбор</span>
+      </a>
+      <nav class="main-nav">
+        <ul>
+          <li><a href="index.html">Главная</a></li>
+          <li><a href="trade-in.html">Trade-In</a></li>
+          <li><a href="contacts.html" class="active">Контакты</a></li>
+          <li><a href="login.html">Войти</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <h1>Контактная информация</h1>
+      
+      <section class="contact-info">
+        <p>
+          <strong>Слоган:</strong> Ваш путь к мечте начинается здесь!
+        </p>
+        <p>
+          <strong>Телефон:</strong> +7 (495) 123-45-67
+        </p>
+        <p>
+          <strong>Адрес:</strong> г. Санкт-Петербург, ул. Автомобилистов, д. 1
+        </p>
+        <p>
+          <strong>Часы работы:</strong> Пн-Пт: 09:00 - 18:00, Сб: 10:00 - 16:00
+        </p>
+      </section>
+
+      <h2 style="margin-top: 2rem;">Мы на карте</h2>
+      <div id="map" style="width: 100%; height: 400px; background: #eee; border-radius: 12px;"></div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2025 "АвтоВыбор". Все права защищены.</p>
+    </div>
+  </footer>
+
+  <script src="https://api-maps.yandex.ru/2.1/?apikey=4a40a81e-33a0-4285-a768-d50cadcde022&lang=ru_RU" type="text/javascript"></script>
+  
+  <script type="text/javascript">
+      ymaps.ready(init);
+      function init(){ 
+          var mapCenterCoordinates = [59.854694, 30.315024]; 
+          var myMap = new ymaps.Map("map", {
+              center: mapCenterCoordinates,
+              zoom: 18
+          });
+          var myPlacemark = new ymaps.Placemark(mapCenterCoordinates, {
+              balloonContent: 'Автосалон "АвтоВыбор"'
+          });
+          myMap.geoObjects.add(myPlacemark);
+      }
+  </script>
+
+</body>
+</html>

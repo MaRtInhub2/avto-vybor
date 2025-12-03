@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trade-In - Оценка авто - АвтоВыбор</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/mobile.css"> </head>
+
+<body>
+
+  <header class="site-header">
+    <div class="container header-content">
+      <a href="index.html" class="logo">
+        <img src="images/logo.png" alt="Логотип"> <span>АвтоВыбор</span>
+      </a>
+      <nav class="main-nav">
+        <ul>
+          <li><a href="index.html">Главная</a></li>
+          <li><a href="trade-in.html" class="active">Trade-In</a></li> 
+          <li><a href="contacts.html">Контакты</a></li>
+          <li><a href="login.html">Войти</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      
+      <div class="trade-in-wrapper">
+        <div class="trade-in-card">
+          <h1>Заявка на Trade-In</h1>
+          <p class="subtitle">Заполните данные вашего автомобиля. Наш эксперт проведет предварительную оценку и свяжется с вами в течение 15 минут.</p>
+          
+          <form id="trade-in-form">
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="trade-in-make">Марка</label>
+                <input type="text" id="trade-in-make" placeholder="Напр., BMW" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="trade-in-model">Модель</label>
+                <input type="text" id="trade-in-model" placeholder="Напр., X5" required>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="trade-in-year">Год выпуска</label>
+                <input type="number" id="trade-in-year" placeholder="2020" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="trade-in-mileage">Пробег (км)</label>
+                <input type="number" id="trade-in-mileage" placeholder="45000" required>
+              </div>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="trade-in-phone">Ваш телефон для связи</label>
+              <input type="tel" id="trade-in-phone" placeholder="+7 (999) 000-00-00" required>
+            </div>
+            
+            <button type="submit" class="btn btn-submit">Отправить заявку на оценку</button>
+            
+            <div id="trade-in-result"></div>
+            
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2025 "АвтоВыбор". Все права защищены.</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js" defer></script>
+</body>
+</html>

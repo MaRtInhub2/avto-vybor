@@ -1,0 +1,170 @@
+/* =========================================
+   mobile.css — ПОЛНАЯ ФИНАЛЬНАЯ ВЕРСИЯ
+   ========================================= */
+
+/* 1. ПЛАНШЕТЫ И ТЕЛЕФОНЫ (До 992px) */
+/* Исправляем страницу товара, чтобы фото было сверху, а текст снизу */
+@media (max-width: 992px) {
+  .car-details-layout {
+    grid-template-columns: 1fr; /* Одна колонка */
+    gap: 20px;
+  }
+
+  /* Делаем главное фото крупнее */
+  .car-main-image-wrapper {
+    width: 100%;
+    max-height: 500px; 
+    aspect-ratio: 4 / 3; /* Более квадратная форма */
+  }
+
+  .car-main-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+/* 2. МОБИЛЬНЫЕ ТЕЛЕФОНЫ (До 768px) */
+@media (max-width: 768px) {
+  
+  /* --- ШАПКА И МЕНЮ --- */
+  .header-content { 
+    flex-direction: column; 
+    gap: 1rem; 
+  }
+  
+  .main-nav ul { 
+    flex-direction: row; 
+    gap: 15px; 
+    justify-content: center; 
+    font-size: 0.85rem; 
+    flex-wrap: wrap;
+  }
+
+  /* --- ГАЛЕРЕЯ (МИНИАТЮРЫ) --- */
+  .car-thumbnails {
+    gap: 6px; 
+    margin-top: 10px;
+  }
+
+  .car-thumbnails img {
+    height: 60px; /* Компактные миниатюры */
+  }
+
+  /* --- СТРАНИЦА АВТОРИЗАЦИИ (Вертикальный режим) --- */
+  
+  /* 1. Настройки тела страницы */
+  body.auth-page-body {
+    height: auto !important;
+    min-height: 100vh;
+    overflow-y: auto !important; /* Разрешаем скролл */
+    display: flex;
+    flex-direction: column;
+    padding: 20px 10px;
+  }
+
+  /* Кнопка "Вернуться" */
+  .back-to-site-link {
+    position: static;
+    margin-bottom: 20px;
+    display: inline-block;
+    align-self: flex-start;
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+
+  /* 2. ГЛАВНЫЙ КОНТЕЙНЕР */
+  .container-auth {
+    width: 100%;
+    max-width: 450px;
+    height: 650px;    /* Фиксированная высота */
+    min-height: 650px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    display: block !important; /* Отключаем Grid */
+    position: relative;
+  }
+
+  /* 3. ФОРМЫ (БЕЛАЯ ЧАСТЬ - СВЕРХУ) */
+  .form-container {
+    position: absolute;
+    top: 0;
+    height: 65%; /* Занимает 65% высоты */
+    width: 100%;
+    transition: all 0.6s ease-in-out;
+  }
+
+  .sign-in-container { z-index: 2; top: 0; }
+  .sign-up-container { opacity: 0; z-index: 1; top: 0; }
+
+  .auth-form { padding: 0 20px; background: #fff; }
+  .auth-h1 { font-size: 24px; margin-bottom: 10px; }
+  .auth-input { padding: 12px; margin: 8px 0; font-size: 14px; }
+  .btn-auth { padding: 12px 40px; margin-top: 10px; }
+
+  /* 4. ПАНЕЛЬ ПЕРЕКЛЮЧЕНИЯ (СИНЯЯ ЧАСТЬ - СНИЗУ) */
+  .overlay-container {
+    position: absolute;
+    top: auto; bottom: 0; left: 0;
+    width: 100%; height: 35%;    /* Занимает 35% высоты */
+    overflow: hidden;
+    transition: transform 0.6s ease-in-out;
+    z-index: 100;
+  }
+
+  .overlay {
+    background: #2e3a4d; 
+    position: relative; left: 0; top: 0;
+    height: 100%; width: 200%;    
+    
+    /* Сдвигаем влево, чтобы показать кнопку "РЕГИСТРАЦИЯ" (правую часть) */
+    transform: translateX(-50%); 
+    
+    transition: transform 0.6s ease-in-out;
+    display: flex;  
+  }
+
+  .overlay-panel {
+    position: relative; top: 0;
+    height: 100%; width: 50%;     
+    padding: 0 20px;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    transform: translateX(0) !important; 
+  }
+
+  .overlay-right { right: 0; }
+  .overlay-left { transform: translateX(0); }
+
+  .auth-p { font-size: 13px; margin: 10px 0 15px; line-height: 1.4; }
+  .btn-auth.ghost { margin-top: 5px; padding: 10px 30px; font-size: 11px; border: 1px solid #fff; }
+
+  /* === АНИМАЦИЯ ПЕРЕКЛЮЧЕНИЯ === */
+  
+  /* Показываем форму регистрации */
+  .container-auth.active .sign-up-container { 
+    transform: translateY(0); 
+    opacity: 1; 
+    z-index: 5; 
+  }
+  
+  /* Прячем форму входа */
+  .container-auth.active .sign-in-container { 
+    transform: translateY(0); 
+    opacity: 0; 
+  }
+  
+  .container-auth.active .overlay-container { 
+    transform: translateY(0); 
+  }
+  
+  /* Сдвигаем синюю панель обратно, чтобы показать кнопку "ВОЙТИ" */
+  .container-auth.active .overlay { 
+    transform: translateX(0); 
+  }
+  
+  .container-auth.active .overlay-left { transform: translateX(0); }
+  .container-auth.active .overlay-right { transform: translateX(0); }
+
+}

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Вход / Регистрация - АвтоВыбор</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/mobile.css"> </head>
+<body class="auth-page-body">
+  
+  <a href="index.html" class="back-to-site-link">&larr; Вернуться на главную</a> 
+  
+  <main>
+    <div class="container-auth" id="auth-container">
+      
+      <div class="form-container sign-up-container">
+        <form id="register-form" class="auth-form">
+          <h1 class="auth-h1">Создать аккаунт</h1>
+          
+          <input type="email" id="register-email" class="auth-input" placeholder="Email" required />
+          <input type="password" id="register-password" class="auth-input" placeholder="Пароль" required />
+          <input type="password" id="register-confirm-password" class="auth-input" placeholder="Подтвердите пароль" required />
+          
+          <button type="submit" class="btn-auth">Зарегистрироваться</button>
+          <p id="register-message" class="form-message"></p>
+        </form>
+      </div>
+
+      <div class="form-container sign-in-container">
+        <form id="login-form" class="auth-form">
+          <h1 class="auth-h1">Войти</h1>
+          
+          <input type="email" id="login-email" class="auth-input" placeholder="Email" required />
+          <input type="password" id="login-password" class="auth-input" placeholder="Пароль" required />
+          
+          <a href="#" class="auth-a">Забыли пароль?</a>
+          <button type="submit" class="btn-auth">Войти</button>
+          <p id="login-message" class="form-message"></p>
+        </form>
+      </div>
+
+      <div class="overlay-container">
+        <div class="overlay">
+          
+          <div class="overlay-panel overlay-left">
+            <h1 class="auth-h1">С возвращением!</h1>
+            <p class="auth-p">Чтобы оставаться на связи, пожалуйста, войдите с вашими данными</p>
+            <button class="btn-auth ghost" id="show-login">Войти</button>
+          </div>
+          
+          <div class="overlay-panel overlay-right">
+            <h1 class="auth-h1">Привет, друг!</h1>
+            <p class="auth-p">Введите свои личные данные и начните путешествие с нами</p>
+            <button class="btn-auth ghost" id="show-register">Регистрация</button>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/main.js" defer></script>
+</body>
+</html>

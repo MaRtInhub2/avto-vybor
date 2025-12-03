@@ -1,0 +1,881 @@
+/* =========================================
+   style.css — ОСНОВНОЙ ДИЗАЙН (DESKTOP)
+   ========================================= */
+
+/* 1. ПЕРЕМЕННЫЕ И СБРОС */
+:root {
+  --primary-color: #007bff;
+  --primary-hover: #0056b3;
+  --dark-bg: #1a1a1a;
+  --light-bg: #f8f9fa;
+  --text-main: #333;
+  --text-muted: #555;
+  --white: #fff;
+  --success: #28a745;
+  --border-radius: 8px;
+  --shadow-soft: 0 5px 15px rgba(0, 0, 0, 0.05);
+  --shadow-hover: 0 12px 25px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  background-color: var(--light-bg);
+  color: var(--text-main);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+  border-radius: var(--border-radius);
+}
+
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+main {
+  padding: 2rem 0;
+  flex: 1;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+/* 2. ШАПКА */
+.site-header {
+  background: var(--dark-bg);
+  padding: 1rem 0;
+  border-bottom: 3px solid var(--primary-color);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--white);
+  text-decoration: none;
+}
+
+.logo img {
+  height: 80px;
+  width: auto;
+  margin-right: 10px;
+}
+
+.main-nav ul {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.main-nav a {
+  text-decoration: none;
+  color: #f0f0f0;
+  font-weight: 500;
+  padding-bottom: 5px;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s;
+}
+
+.main-nav a:hover,
+.main-nav a.active {
+  color: var(--white);
+  border-bottom-color: var(--primary-color);
+}
+
+/* Кнопка Войти */
+.main-nav a[href="login.html"] {
+  border: 1px solid #555;
+  border-radius: var(--border-radius);
+  padding: 8px 18px;
+  background: transparent;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.main-nav a[href="login.html"]:hover {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--white);
+}
+
+/* Кнопка Выйти */
+.logout-btn-new {
+  position: relative;
+  border: 1px solid #555;
+  background: transparent;
+  color: #f0f0f0;
+  padding: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  overflow: hidden;
+  width: 90px;
+  height: 38px;
+  transition: background-color 0.3s ease;
+}
+
+.logout-btn-new:hover {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.logout-btn-text,
+.logout-btn-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s cubic-bezier(0.76, 0.05, 0.24, 0.95);
+}
+
+.logout-btn-icon {
+  color: var(--white);
+  transform: translateX(100%);
+}
+
+.logout-btn-new:hover .logout-btn-text {
+  transform: translateX(-100%);
+}
+
+.logout-btn-new:hover .logout-btn-icon {
+  transform: translateX(0);
+}
+
+/* 3. ГЛАВНАЯ */
+.absolute-gallery {
+  display: flex;
+  overflow-x: auto;
+  width: 100%;
+  height: auto;
+  padding: 10px 0 20px 0;
+  margin-bottom: 3rem;
+  gap: 20px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.absolute-gallery::-webkit-scrollbar {
+  display: none;
+}
+
+.gallery-item {
+  width: 300px;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-soft);
+  border-radius: var(--border-radius);
+  transition: transform 0.3s;
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: var(--border-radius);
+}
+
+.car-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+}
+
+.car-card {
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.car-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-hover);
+}
+
+.car-card img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+
+.car-card-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.car-card-content h3 {
+  font-size: 1.25rem;
+}
+
+.car-card-content p {
+  flex-grow: 1;
+  margin-bottom: 1rem;
+  color: var(--text-muted);
+}
+
+.car-card-content strong {
+  font-size: 1.2rem;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.btn {
+  display: inline-block;
+  background: var(--primary-color);
+  color: var(--white);
+  padding: 10px 20px;
+  text-decoration: none;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.btn:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+}
+
+/* 4. СТРАНИЦА ТОВАРА */
+.car-details-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  background: var(--white);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow-soft);
+}
+
+.car-main-image-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--border-radius);
+  background-color: #f0f0f0; /* Серый фон, если фото не заполнит всё место */
+  
+  /* Фиксируем пропорции (16:9 или 4:3 - выберите, что нравится) */
+  aspect-ratio: 16 / 10; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.car-main-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; 
+  object-position: center;
+}
+
+.car-main-image-wrapper button.prev,
+.car-main-image-wrapper button.next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.6);
+  color: var(--white);
+  border: none;
+  font-size: 24px;
+  padding: 10px 15px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.3s;
+  border-radius: 4px;
+}
+
+.car-main-image-wrapper:hover button.prev,
+.car-main-image-wrapper:hover button.next {
+  opacity: 1;
+}
+
+.prev {
+  left: 10px;
+}
+
+.next {
+  right: 10px;
+}
+
+.car-thumbnails {
+  display: grid;
+  /* Делаем миниатюры по 4 штуки в ряд */
+  grid-template-columns: repeat(4, 1fr); 
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.car-thumbnails img {
+  width: 100%;
+  /* Фиксированная высота для всех миниатюр */
+  height: 80px; 
+  
+  /* Самое важное: обрезаем лишнее, чтобы все были одинаковые */
+  object-fit: cover; 
+  
+  border-radius: 4px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.car-thumbnails img:hover {
+  border-color: var(--primary-color);
+  opacity: 0.8;
+}
+
+.car-price {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.specs-list li {
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* 5. TRADE-IN */
+.trade-in-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0;
+}
+
+.trade-in-card {
+  background: var(--white);
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  max-width: 700px;
+  width: 100%;
+  border-top: 5px solid var(--primary-color);
+}
+
+.trade-in-card h1 {
+  text-align: center;
+}
+
+.trade-in-card .subtitle {
+  text-align: center;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #444;
+  text-transform: uppercase;
+}
+
+.trade-in-card input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #eee;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #f9f9f9;
+  transition: border-color 0.3s;
+}
+
+.trade-in-card input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  background: var(--white);
+}
+
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.btn-submit {
+  width: 100%;
+  background-color: var(--success);
+  padding: 15px;
+  font-size: 1.1rem;
+  color: var(--white);
+}
+
+.btn-submit:hover {
+  background-color: #218838;
+}
+
+#trade-in-result.success {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #e8f5e9;
+  border: 1px solid #c8e6c9;
+  border-radius: 8px;
+  text-align: center;
+  color: #2e7d32;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 6. КОНТАКТЫ И ФУТЕР */
+.contact-info {
+  background: var(--white);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 2rem;
+}
+
+.contact-info p {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 1rem;
+}
+
+.contact-info p:last-child {
+  border: none;
+  margin-bottom: 0;
+}
+
+.contact-info strong {
+  width: 140px;
+  display: inline-block;
+  color: var(--text-main);
+}
+
+.site-footer {
+  background: var(--dark-bg);
+  color: #aaa;
+  text-align: center;
+  padding: 2rem 0;
+  margin-top: auto;
+}
+
+.back-to-site-link {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 999;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 15px;
+  border-radius: 20px;
+  text-decoration: none;
+  color: #333;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.back-to-site-link:hover {
+  color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+
+
+
+/* =========================================
+   8. СТРАНИЦА АВТОРИЗАЦИИ (КЛАССИЧЕСКИЙ КОМПАКТНЫЙ ВИД)
+   ========================================= */
+
+body.auth-page-body {
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+
+  /* Центрирование на весь экран */
+  height: 100vh;
+  width: 100%;
+  display: grid !important;
+  place-items: center;
+  overflow: hidden;
+  position: relative;
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* Сбрасываем влияние глобальных стилей */
+body.auth-page-body main {
+  padding: 0 !important;
+  margin: 0 !important;
+  flex: none !important;
+  width: auto;
+  height: auto;
+  display: contents;
+}
+
+/* Фон с размытием */
+body.auth-page-body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('../images/Фон.jpg');
+  background-size: cover;
+  background-position: center;
+  filter: blur(5px) brightness(0.5);
+  z-index: -1;
+}
+
+/* Кнопка "Вернуться" */
+.back-to-site-link {
+  position: absolute;
+  top: 25px;
+  left: 25px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 18px;
+  border-radius: 20px;
+  text-decoration: none;
+  color: #333;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 999;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s;
+}
+
+.back-to-site-link:hover {
+  transform: scale(1.05);
+}
+
+/* --- ГЛАВНЫЙ БЛОК (ВЕРНУЛИ ФИКСИРОВАННЫЙ РАЗМЕР) --- */
+.container-auth {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  position: relative;
+  overflow: hidden;
+
+  /* Те самые размеры "как было раньше" */
+  width: 768px;
+  max-width: 100%;
+  min-height: 480px;
+
+  grid-area: 1 / 1;
+}
+
+.form-container {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  transition: all 0.6s ease-in-out;
+}
+
+.sign-in-container {
+  left: 0;
+  width: 50%;
+  z-index: 2;
+}
+
+.sign-up-container {
+  left: 0;
+  width: 50%;
+  opacity: 0;
+  z-index: 1;
+}
+
+.auth-form {
+  background-color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 0 50px;
+  height: 100%;
+  text-align: center;
+}
+
+/* Заголовки */
+.auth-h1 {
+  font-weight: bold;
+  margin: 0;
+  margin-bottom: 15px;
+  /* Небольшой отступ */
+  color: #333;
+  font-size: 2rem;
+  /* Стандартный размер (около 32px) */
+}
+
+/* Поля ввода */
+.auth-input {
+  background-color: #eee;
+  border: none;
+  padding: 12px 15px;
+  margin: 8px 0;
+  width: 100%;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.auth-a {
+  color: #333;
+  font-size: 12px;
+  /* Мелкий текст ссылки */
+  text-decoration: none;
+  margin: 15px 0;
+  border-bottom: 1px solid transparent;
+}
+
+.auth-a:hover {
+  border-bottom: 1px solid #333;
+}
+
+/* Кнопки */
+.btn-auth {
+  border-radius: 20px;
+  border: 1px solid #3498db;
+  /* Ярко-синий */
+  background-color: #3498db;
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 12px 45px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: transform 80ms ease-in, background 0.3s;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.btn-auth:hover {
+  background-color: #2980b9;
+}
+
+.btn-auth:active {
+  transform: scale(0.95);
+}
+
+/* Кнопка на темном фоне */
+.btn-auth.ghost {
+  background-color: transparent;
+  border-color: #FFFFFF;
+  margin-top: 20px;
+}
+
+.btn-auth.ghost:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Правая панель (Темно-синяя) */
+.overlay-container {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
+  transition: transform 0.6s ease-in-out;
+  z-index: 100;
+}
+
+.overlay {
+  background: #2e3a4d;
+  /* Тот самый цвет */
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: 0 0;
+  color: #FFFFFF;
+  position: relative;
+  left: -100%;
+  height: 100%;
+  width: 200%;
+  transform: translateX(0);
+  transition: transform 0.6s ease-in-out;
+}
+
+.overlay-panel {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 0 40px;
+  text-align: center;
+  top: 0;
+  height: 100%;
+  width: 50%;
+  transform: translateX(0);
+  transition: transform 0.6s ease-in-out;
+}
+
+.overlay-panel .auth-h1 {
+  color: #ffffff;
+  margin-bottom: 0;
+}
+
+.auth-p {
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 20px;
+  margin: 20px 0 30px;
+  color: #eee;
+}
+
+.overlay-left {
+  transform: translateX(-20%);
+}
+
+.overlay-right {
+  right: 0;
+  transform: translateX(0);
+}
+
+/* Анимация */
+.container-auth.active .sign-in-container {
+  transform: translateX(100%);
+}
+
+.container-auth.active .sign-up-container {
+  transform: translateX(100%);
+  opacity: 1;
+  z-index: 5;
+  animation: show 0.6s;
+}
+
+.container-auth.active .overlay-container {
+  transform: translateX(-100%);
+}
+
+.container-auth.active .overlay {
+  transform: translateX(50%);
+}
+
+.container-auth.active .overlay-left {
+  transform: translateX(0);
+}
+
+.container-auth.active .overlay-right {
+  transform: translateX(20%);
+}
+
+@keyframes show {
+
+  0%,
+  49.99% {
+    opacity: 0;
+    z-index: 1;
+  }
+
+  50%,
+  100% {
+    opacity: 1;
+    z-index: 5;
+  }
+}
+
+/* --- Стили для сообщений в Trade-In --- */
+
+/* Блок ошибки (когда не вошел) */
+.error-box {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #fff3f3; /* Светло-розовый фон */
+  border: 1px solid #ffcdd2; /* Красная рамка */
+  border-radius: 8px;
+  text-align: center;
+  color: #d32f2f; /* Темно-красный текст */
+  animation: fadeIn 0.5s ease;
+}
+
+.error-box h3 {
+  margin-bottom: 10px;
+  color: #c62828;
+}
+
+.error-box p {
+  margin-bottom: 15px;
+  color: #555;
+}
+
+/* Маленькая кнопка внутри ошибки */
+.btn-small {
+  display: inline-block;
+  background: #d32f2f;
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.btn-small:hover {
+  background: #b71c1c;
+}
