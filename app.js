@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const mysql = require('mysql2');
-require('dotenv').config();
 
 const app = express();
 
@@ -14,24 +13,35 @@ app.use(express.urlencoded({ extended: true }));
 // Статические файлы
 app.use(express.static(path.join(__dirname, 'car-dealership-website')));
 
-// Подключение к базе данных
-const connection = mysql.createConnection({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'railway',
-    port: process.env.DB_PORT || 3306
+// ✅ ПРАВИЛЬНОЕ подключение к Railway MySQL
+const pool = mysql.createPool({
+    host: process.env.MYSQLHOST || process.env.DB_HOST || 'localhost',
+    user: process.env.MYSQLUSER || process.env.DB_USER || 'root',
+    password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD || '',
+    database: process.env.MYSQLDATABASE || process.env.DB_NAME || 'railway',
+    port: process.env.MYSQLPORT || process.env.DB_PORT || 3306,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
-connection.connect((err) => {
+// Проверка подключения
+pool.getConnection((err, connection) => {
     if (err) {
-        console.error('❌ Database connection error:', err);
+        console.error('❌ Database connection error:', err.message);
+        console.log('Environment variables:', {
+            host: process.env.MYSQLHOST || process.env.DB_HOST,
+            user: process.env.MYSQLUSER || process.env.DB_USER,
+            database: process.env.MYSQLDATABASE || process.env.DB_NAME,
+            port: process.env.MYSQLPORT || process.env.DB_PORT
+        });
     } else {
-        console.log('✅ Connected to MySQL database');
+        console.log('✅ Connected to MySQL database on Railway');
+        connection.release();
     }
 });
 
-// ✅ API регистрации
+// ✅ API регистрации (используем pool)
 app.post('/api/register', (req, res) => {
     console.log('Registration request:', req.body);
     
@@ -46,12 +56,12 @@ app.post('/api/register', (req, res) => {
     
     // Проверяем, есть ли пользователь с таким email
     const checkQuery = 'SELECT id FROM users WHERE email = ?';
-    connection.query(checkQuery, [email], (err, results) => {
+    pool.query(checkQuery, [email], (err, results) => {
         if (err) {
             console.error('Database error:', err);
             return res.status(500).json({ 
                 success: false, 
-                message: 'Database error' 
+                message: 'Database error: ' + err.message 
             });
         }
         
@@ -64,12 +74,12 @@ app.post('/api/register', (req, res) => {
         
         // Создаем нового пользователя
         const insertQuery = 'INSERT INTO users (email, password) VALUES (?, ?)';
-        connection.query(insertQuery, [email, password], (err, result) => {
+        pool.query(insertQuery, [email, password], (err, result) => {
             if (err) {
                 console.error('Insert error:', err);
                 return res.status(500).json({ 
                     success: false, 
-                    message: 'Error creating user' 
+                    message: 'Error creating user: ' + err.message 
                 });
             }
             
@@ -88,14 +98,20 @@ app.post('/api/login', (req, res) => {
     const { email, password } = req.body;
     
     const query = 'SELECT * FROM users WHERE email = ? AND password = ?';
-    connection.query(query, [email, password], (err, results) => {
+    pool.query(query, [email, password], (err, results) => {
         if (err) {
             console.error('Login error:', err);
-            return res.status(500).json({ success: false, message: 'Database error' });
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Database error: ' + err.message 
+            });
         }
         
         if (results.length === 0) {
-            return res.json({ success: false, message: 'Invalid email or password' });
+            return res.json({ 
+                success: false, 
+                message: 'Invalid email or password' 
+            });
         }
         
         res.json({ 
@@ -115,10 +131,13 @@ app.post('/api/tradein', (req, res) => {
         VALUES (?, ?, ?, ?, ?, ?)
     `;
     
-    connection.query(query, [make, model, year, mileage, phone, user_email], (err, result) => {
+    pool.query(query, [make, model, year, mileage, phone, user_email], (err, result) => {
         if (err) {
             console.error('Trade-in error:', err);
-            return res.status(500).json({ success: false, message: 'Database error' });
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Database error: ' + err.message 
+            });
         }
         
         res.json({ 
@@ -131,10 +150,20 @@ app.post('/api/tradein', (req, res) => {
 
 // Проверка работы сервера
 app.get('/api/health', (req, res) => {
-    res.json({ 
-        status: 'OK', 
-        message: 'Server is running',
-        database: 'Connected'
+    pool.query('SELECT 1 as test', (err) => {
+        if (err) {
+            return res.json({ 
+                status: 'WARNING', 
+                message: 'Server is running',
+                database: 'DISCONNECTED: ' + err.message
+            });
+        }
+        
+        res.json({ 
+            status: 'OK', 
+            message: 'Server is running',
+            database: 'CONNECTED'
+        });
     });
 });
 
@@ -143,8 +172,12 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'car-dealership-website', 'index.html'));
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📁 Serving from: ${path.join(__dirname, 'car-dealership-website')}`);
+    console.log('Database config:', {
+        host: process.env.MYSQLHOST || process.env.DB_HOST,
+        database: process.env.MYSQLDATABASE || process.env.DB_NAME
+    });
 });
