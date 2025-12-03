@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const mysql = require('mysql2');
-const fs = require('fs');
 
 const app = express();
 
@@ -15,130 +14,77 @@ app.use(express.urlencoded({ extended: true }));
 const staticPath = path.join(__dirname, 'car-dealership-website');
 app.use(express.static(staticPath));
 
-// 🔍 Проверяем переменные окружения
-console.log('='.repeat(60));
-console.log('🔧 RAILWAY CONFIGURATION');
-console.log('='.repeat(60));
-console.log('Port:', process.env.PORT || '8080 (default)');
-
 // 🗄️ КОНФИГУРАЦИЯ БАЗЫ ДАННЫХ
-let dbConfig;
+const dbConfig = {
+    host: process.env.MYSQLHOST || 'localhost',
+    user: process.env.MYSQLUSER || 'root',
+    password: process.env.MYSQLPASSWORD || '',
+    database: process.env.MYSQLDATABASE || 'railway',
+    port: process.env.MYSQLPORT || 3306
+};
 
-// ПРИОРИТЕТ 1: MYSQL_PUBLIC_URL (для публичного доступа)
-if (process.env.MYSQL_PUBLIC_URL) {
-    console.log('✅ Found MYSQL_PUBLIC_URL');
-    try {
-        const url = new URL(process.env.MYSQL_PUBLIC_URL);
-        dbConfig = {
-            host: url.hostname,       // crossover.proxy.rlwy.net
-            user: url.username,       // root
-            password: url.password,   // ваш пароль
-            database: url.pathname.substring(1), // railway
-            port: url.port || 3306,   // 44227
-            ssl: { rejectUnauthorized: false }
-        };
-        console.log(`   Host: ${dbConfig.host}:${dbConfig.port}`);
-        console.log(`   Database: ${dbConfig.database}`);
-    } catch (error) {
-        console.error('❌ Error parsing MYSQL_PUBLIC_URL:', error.message);
-    }
-}
+console.log('🚀 Server starting...');
+console.log('📊 Database config:', {
+    host: dbConfig.host,
+    database: dbConfig.database,
+    port: dbConfig.port
+});
 
-// ПРИОРИТЕТ 2: Отдельные переменные (через Reference)
-if (!dbConfig && process.env.MYSQLHOST) {
-    console.log('✅ Found individual MySQL variables via Reference');
-    dbConfig = {
-        host: process.env.MYSQLHOST,
-        user: process.env.MYSQLUSER || 'root',
-        password: process.env.MYSQLPASSWORD || '',
-        database: process.env.MYSQLDATABASE || 'railway',
-        port: process.env.MYSQLPORT || 3306,
-        ssl: { rejectUnauthorized: false }
-    };
-    console.log(`   Host: ${dbConfig.host}:${dbConfig.port}`);
-    console.log(`   Database: ${dbConfig.database}`);
-}
-
-// ПРИОРИТЕТ 3: Fallback
-if (!dbConfig) {
-    console.log('⚠️ Using fallback configuration');
-    dbConfig = {
-        host: 'localhost',
-        user: 'root',
-        password: '',
-        database: 'railway',
-        port: 3306
-    };
-}
-
-console.log('='.repeat(60));
-
-// 🗃️ Подключение к базе данных
+// Пул соединений (с таймаутами)
 const pool = mysql.createPool({
     ...dbConfig,
     waitForConnections: true,
-    connectionLimit: 10,
+    connectionLimit: 5,
     queueLimit: 0,
-    connectTimeout: 15000,
-    ssl: dbConfig.ssl
-});
-
-// Проверка подключения
-pool.getConnection((err, connection) => {
-    if (err) {
-        console.error('❌ DATABASE CONNECTION ERROR:', err.message);
-        console.error('   Code:', err.code);
-        console.error('   Host attempted:', dbConfig.host);
-        console.error('   Port attempted:', dbConfig.port);
-        
-        // Предложения по исправлению
-        console.log('\n💡 TROUBLESHOOTING:');
-        console.log('   1. Check if MySQL variables are referenced in Railway');
-        console.log('   2. Verify MySQL service is running');
-        console.log('   3. Check firewall/network settings');
-        console.log('   4. Try MYSQL_PUBLIC_URL instead of individual vars');
-    } else {
-        console.log('✅ DATABASE CONNECTED SUCCESSFULLY!');
-        console.log(`   Host: ${connection.config.host}`);
-        console.log(`   Database: ${connection.config.database}`);
-        console.log(`   User: ${connection.config.user}`);
-        
-        // Проверяем таблицы
-        connection.query('SHOW TABLES', (tableErr, results) => {
-            if (tableErr) {
-                console.log('   Could not list tables:', tableErr.message);
-            } else {
-                const tables = results.map(row => Object.values(row)[0]);
-                console.log(`   Found ${tables.length} tables`);
-                if (tables.includes('users') && tables.includes('trade_in_requests')) {
-                    console.log('   ✅ Required tables exist: users, trade_in_requests');
-                }
-            }
-            connection.release();
-        });
-    }
+    connectTimeout: 10000, // 10 секунд
+    acquireTimeout: 10000
 });
 
 // 📱 API Endpoints
+
+// Health check (ОБЯЗАТЕЛЬНО ДЛЯ RAILWAY)
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
+});
+
+app.get('/api/health', (req, res) => {
+    // Быстрая проверка без блокировки
+    pool.query('SELECT 1 as test', (err) => {
+        if (err) {
+            res.json({
+                status: 'WARNING',
+                message: 'App running, database issues',
+                uptime: process.uptime()
+            });
+        } else {
+            res.json({
+                status: 'OK',
+                message: 'All systems operational',
+                uptime: process.uptime()
+            });
+        }
+    });
+});
+
+// Регистрация
 app.post('/api/register', (req, res) => {
-    console.log('📝 Registration attempt for:', req.body.email);
+    console.log('📝 Registration attempt:', req.body.email);
+    
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+        return res.json({ 
+            success: false, 
+            message: 'Email and password are required' 
+        });
+    }
     
     pool.getConnection((err, connection) => {
         if (err) {
-            return res.json({
-                success: false,
-                message: 'Database unavailable',
-                error: err.message
-            });
-        }
-        
-        const { email, password } = req.body;
-        
-        if (!email || !password) {
-            connection.release();
-            return res.json({
-                success: false,
-                message: 'Email and password required'
+            console.error('Database connection error:', err.message);
+            return res.json({ 
+                success: false, 
+                message: 'Service temporarily unavailable. Please try again.' 
             });
         }
         
@@ -146,18 +92,18 @@ app.post('/api/register', (req, res) => {
         connection.query('SELECT id FROM users WHERE email = ?', [email], (err, results) => {
             if (err) {
                 connection.release();
-                return res.json({
-                    success: false,
-                    message: 'Database error',
-                    error: err.message
+                console.error('Query error:', err.message);
+                return res.json({ 
+                    success: false, 
+                    message: 'Database error' 
                 });
             }
             
             if (results.length > 0) {
                 connection.release();
-                return res.json({
-                    success: false,
-                    message: 'Email already registered'
+                return res.json({ 
+                    success: false, 
+                    message: 'User already exists' 
                 });
             }
             
@@ -168,19 +114,18 @@ app.post('/api/register', (req, res) => {
                     connection.release();
                     
                     if (err) {
-                        console.error('Registration error:', err.message);
-                        return res.json({
-                            success: false,
-                            message: 'Registration failed',
-                            error: err.message
+                        console.error('Insert error:', err.message);
+                        return res.json({ 
+                            success: false, 
+                            message: 'Registration failed' 
                         });
                     }
                     
-                    console.log('✅ New user registered:', email);
-                    res.json({
-                        success: true,
+                    console.log('✅ User registered:', email);
+                    res.json({ 
+                        success: true, 
                         message: 'Registration successful!',
-                        userId: result.insertId
+                        userId: result.insertId 
                     });
                 }
             );
@@ -188,53 +133,99 @@ app.post('/api/register', (req, res) => {
     });
 });
 
-// 🩺 Health Check
-app.get('/api/health', (req, res) => {
-    pool.query('SELECT 1 as health', (err) => {
-        if (err) {
-            res.json({
-                status: 'ERROR',
-                message: 'Database connection failed',
-                error: err.message,
-                config: {
-                    host: dbConfig.host,
-                    port: dbConfig.port,
-                    database: dbConfig.database
-                }
-            });
-        } else {
-            res.json({
-                status: 'OK',
-                message: 'All systems operational',
-                database: 'Connected',
-                timestamp: new Date().toISOString()
+// Вход
+app.post('/api/login', (req, res) => {
+    const { email, password } = req.body;
+    
+    pool.query('SELECT * FROM users WHERE email = ? AND password = ?', 
+        [email, password], 
+        (err, results) => {
+            if (err) {
+                console.error('Login error:', err.message);
+                return res.json({ 
+                    success: false, 
+                    message: 'Database error' 
+                });
+            }
+            
+            if (results.length === 0) {
+                return res.json({ 
+                    success: false, 
+                    message: 'Invalid email or password' 
+                });
+            }
+            
+            res.json({ 
+                success: true, 
+                message: 'Login successful',
+                user: results[0]
             });
         }
-    });
+    );
 });
 
-// 🏠 Главная страница
-app.get('/', (req, res) => {
+// Trade-In запрос
+app.post('/api/tradein', (req, res) => {
+    const { make, model, year, mileage, phone, user_email } = req.body;
+    
+    pool.query(
+        'INSERT INTO trade_in_requests (make, model, year, mileage, phone, user_email) VALUES (?, ?, ?, ?, ?, ?)',
+        [make, model, year, mileage, phone, user_email],
+        (err, result) => {
+            if (err) {
+                console.error('Trade-in error:', err.message);
+                return res.json({ 
+                    success: false, 
+                    message: 'Failed to submit request' 
+                });
+            }
+            
+            res.json({ 
+                success: true, 
+                message: 'Request submitted successfully',
+                requestId: result.insertId
+            });
+        }
+    );
+});
+
+// 🏠 Все маршруты ведут на index.html
+app.get('*', (req, res) => {
     res.sendFile(path.join(staticPath, 'index.html'));
 });
 
-// Все HTML файлы
-app.get('*.html', (req, res) => {
-    const filePath = path.join(staticPath, req.path);
-    if (fs.existsSync(filePath)) {
-        res.sendFile(filePath);
-    } else {
-        res.redirect('/');
-    }
+// Запуск сервера
+const PORT = process.env.PORT || 8080;
+const server = app.listen(PORT, () => {
+    console.log(`✅ Server running on port ${PORT}`);
+    console.log(`📁 Serving from: ${staticPath}`);
+    console.log('👉 Health check: /health');
+    console.log('👉 API Health: /api/health');
+    
+    // Асинхронная проверка базы после запуска
+    setTimeout(() => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                console.log('ℹ️ Database connection check:', err.message);
+            } else {
+                console.log('✅ Database connected');
+                connection.query('SHOW TABLES', (err, tables) => {
+                    if (!err && tables) {
+                        console.log('📋 Tables:', tables.map(t => Object.values(t)[0]));
+                    }
+                    connection.release();
+                });
+            }
+        });
+    }, 1000);
 });
 
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-    console.log('='.repeat(60));
-    console.log(`🚀 SERVER STARTED on port ${PORT}`);
-    console.log(`📁 Serving static files from: ${staticPath}`);
-    console.log('='.repeat(60));
-    console.log('👉 Health Check:', `/api/health`);
-    console.log('👉 Debug Info:', `/api/debug`);
-    console.log('='.repeat(60));
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('🛑 SIGTERM received, shutting down gracefully...');
+    server.close(() => {
+        console.log('✅ Server closed');
+        pool.end();
+        process.exit(0);
+    });
 });
