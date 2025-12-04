@@ -59,14 +59,14 @@ app.get('/api/health', (req, res) => {
         } else {
             res.json({
                 status: 'OK',
-                message: 'All systems operational',
+                message: 'Все системы работают',
                 uptime: process.uptime()
             });
         }
     });
 });
 
-// Регистрация
+// Регистрация (ИСПРАВЛЕНО: русские ошибки)
 app.post('/api/register', (req, res) => {
     console.log('📝 Registration attempt:', req.body.email);
     
@@ -75,7 +75,23 @@ app.post('/api/register', (req, res) => {
     if (!email || !password) {
         return res.json({ 
             success: false, 
-            message: 'Email and password are required' 
+            message: 'Email и пароль обязательны для заполнения' 
+        });
+    }
+    
+    // Простая валидация email
+    if (!email.includes('@') || !email.includes('.')) {
+        return res.json({
+            success: false,
+            message: 'Некорректный формат email'
+        });
+    }
+    
+    // Простая валидация пароля
+    if (password.length < 6) {
+        return res.json({
+            success: false,
+            message: 'Пароль должен содержать минимум 6 символов'
         });
     }
     
@@ -84,7 +100,7 @@ app.post('/api/register', (req, res) => {
             console.error('Database connection error:', err.message);
             return res.json({ 
                 success: false, 
-                message: 'Service temporarily unavailable. Please try again.' 
+                message: 'Сервис временно недоступен. Попробуйте позже.' 
             });
         }
         
@@ -95,7 +111,7 @@ app.post('/api/register', (req, res) => {
                 console.error('Query error:', err.message);
                 return res.json({ 
                     success: false, 
-                    message: 'Database error' 
+                    message: 'Ошибка базы данных' 
                 });
             }
             
@@ -103,7 +119,7 @@ app.post('/api/register', (req, res) => {
                 connection.release();
                 return res.json({ 
                     success: false, 
-                    message: 'User already exists' 
+                    message: 'Пользователь с таким email уже зарегистрирован' 
                 });
             }
             
@@ -115,16 +131,25 @@ app.post('/api/register', (req, res) => {
                     
                     if (err) {
                         console.error('Insert error:', err.message);
+                        
+                        // Проверка на дублирование email (на случай, если между проверкой и вставкой появился пользователь)
+                        if (err.code === 'ER_DUP_ENTRY') {
+                            return res.json({
+                                success: false,
+                                message: 'Пользователь с таким email уже зарегистрирован'
+                            });
+                        }
+                        
                         return res.json({ 
                             success: false, 
-                            message: 'Registration failed' 
+                            message: 'Ошибка при регистрации. Попробуйте снова.' 
                         });
                     }
                     
                     console.log('✅ User registered:', email);
                     res.json({ 
                         success: true, 
-                        message: 'Registration successful!',
+                        message: 'Регистрация прошла успешно!',
                         userId: result.insertId 
                     });
                 }
@@ -133,9 +158,16 @@ app.post('/api/register', (req, res) => {
     });
 });
 
-// Вход
+// Вход (ИСПРАВЛЕНО: русские ошибки)
 app.post('/api/login', (req, res) => {
     const { email, password } = req.body;
+    
+    if (!email || !password) {
+        return res.json({
+            success: false,
+            message: 'Введите email и пароль'
+        });
+    }
     
     pool.query('SELECT * FROM users WHERE email = ? AND password = ?', 
         [email, password], 
@@ -144,29 +176,44 @@ app.post('/api/login', (req, res) => {
                 console.error('Login error:', err.message);
                 return res.json({ 
                     success: false, 
-                    message: 'Database error' 
+                    message: 'Ошибка базы данных' 
                 });
             }
             
             if (results.length === 0) {
                 return res.json({ 
                     success: false, 
-                    message: 'Invalid email or password' 
+                    message: 'Неверный email или пароль' 
                 });
             }
             
             res.json({ 
                 success: true, 
-                message: 'Login successful',
+                message: 'Вход выполнен успешно',
                 user: results[0]
             });
         }
     );
 });
 
-// Trade-In запрос
+// Trade-In запрос (ИСПРАВЛЕНО: русские ошибки)
 app.post('/api/tradein', (req, res) => {
     const { make, model, year, mileage, phone, user_email } = req.body;
+    
+    // Базовая валидация
+    if (!make || !model || !year || !mileage || !phone || !user_email) {
+        return res.json({
+            success: false,
+            message: 'Все поля обязательны для заполнения'
+        });
+    }
+    
+    if (phone.length < 10) {
+        return res.json({
+            success: false,
+            message: 'Некорректный номер телефона'
+        });
+    }
     
     pool.query(
         'INSERT INTO trade_in_requests (make, model, year, mileage, phone, user_email) VALUES (?, ?, ?, ?, ?, ?)',
@@ -176,13 +223,13 @@ app.post('/api/tradein', (req, res) => {
                 console.error('Trade-in error:', err.message);
                 return res.json({ 
                     success: false, 
-                    message: 'Failed to submit request' 
+                    message: 'Не удалось отправить заявку. Попробуйте позже.' 
                 });
             }
             
             res.json({ 
                 success: true, 
-                message: 'Request submitted successfully',
+                message: 'Заявка успешно отправлена',
                 requestId: result.insertId
             });
         }
