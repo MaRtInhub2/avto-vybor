@@ -94,7 +94,7 @@ function setupAuthForms() {
       const password = document.getElementById('register-password').value;
       const messageEl = document.getElementById('register-message');
 
-      // ✅ Показываем загрузку
+      // Показываем загрузку
       messageEl.textContent = 'Отправка...';
       messageEl.className = 'form-message info';
 
@@ -108,9 +108,9 @@ function setupAuthForms() {
       .then(data => {
         console.log('Registration response:', data); // для отладки
         
-        // ✅ ПРАВИЛЬНАЯ ПРОВЕРКА
+        // ПРАВИЛЬНАЯ ПРОВЕРКА
         if (data.success) {
-          messageEl.textContent = '✅ ' + data.message;
+          messageEl.textContent = '✅ Регистрация прошла успешно!';
           messageEl.className = 'form-message success';
           
           // Автоматически переключаем на форму входа через 2 секунды
@@ -141,7 +141,7 @@ function setupAuthForms() {
       const password = document.getElementById('login-password').value;
       const messageEl = document.getElementById('login-message');
 
-      // ✅ Показываем загрузку
+      // Показываем загрузку
       messageEl.textContent = 'Проверка...';
       messageEl.className = 'form-message info';
 
@@ -154,9 +154,9 @@ function setupAuthForms() {
       .then(data => {
         console.log('Login response:', data); // для отладки
         
-        // ✅ ПРАВИЛЬНАЯ ПРОВЕРКА
+        // ПРАВИЛЬНАЯ ПРОВЕРКА
         if (data.success) {
-          messageEl.textContent = '✅ ' + data.message;
+          messageEl.textContent = '✅ Вход выполнен успешно!';
           messageEl.className = 'form-message success';
           
           // Сохраняем пользователя
@@ -249,22 +249,31 @@ function setupTradeInForm() {
     // 5. ОТПРАВКА НА СЕРВЕР
     const formData = { make, model, year, mileage, phone, userEmail: loggedInUser };
 
-    fetch('/api/trade-in', {
+    fetch('/api/tradein', {  // ← ИСПРАВЛЕНО: должно быть /api/tradein (без дефиса)
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
     })
     .then(res => res.json())
     .then(data => {
-        // УСПЕХ
-        resultEl.style.display = 'block';
-        resultEl.className = 'success'; // Делаем блок зеленым
-        resultEl.innerHTML = `
-          <p>✅ <b>Заявка успешно отправлена!</b></p>
-          <p>Предварительная оценка: <strong>${formattedPrice} ₽</strong></p>
-          <p class="disclaimer">Менеджер свяжется с вами по номеру ${phone}</p>
-        `;
-        tradeInForm.reset();
+        console.log('Trade-in response:', data); // для отладки
+        
+        // ПРАВИЛЬНАЯ ПРОВЕРКА
+        if (data.success) {
+            // УСПЕХ
+            resultEl.style.display = 'block';
+            resultEl.className = 'success';
+            resultEl.innerHTML = `
+              <p>✅ <b>Заявка успешно отправлена!</b></p>
+              <p>Предварительная оценка: <strong>${formattedPrice} ₽</strong></p>
+              <p class="disclaimer">Менеджер свяжется с вами по номеру ${phone}</p>
+              ${data.requestId ? `<p><small>Номер заявки: ${data.requestId}</small></p>` : ''}
+            `;
+            tradeInForm.reset();
+        } else {
+            // ОШИБКА
+            showError(data.message || 'Не удалось отправить заявку. Попробуйте позже.');
+        }
     })
     .catch(err => {
         console.error(err);
