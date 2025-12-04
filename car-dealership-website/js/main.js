@@ -94,6 +94,10 @@ function setupAuthForms() {
       const password = document.getElementById('register-password').value;
       const messageEl = document.getElementById('register-message');
 
+      // ✅ Показываем загрузку
+      messageEl.textContent = 'Отправка...';
+      messageEl.className = 'form-message info';
+
       // Отправляем данные на сервер
       fetch('/api/register', {
         method: 'POST',
@@ -102,13 +106,28 @@ function setupAuthForms() {
       })
       .then(res => res.json())
       .then(data => {
-        if (data.message === 'Успешная регистрация') {
-          messageEl.textContent = 'Вы зарегистрированы! Теперь войдите.';
+        console.log('Registration response:', data); // для отладки
+        
+        // ✅ ПРАВИЛЬНАЯ ПРОВЕРКА
+        if (data.success) {
+          messageEl.textContent = '✅ ' + data.message;
           messageEl.className = 'form-message success';
+          
+          // Автоматически переключаем на форму входа через 2 секунды
+          setTimeout(() => {
+            if (document.getElementById('show-login')) {
+              document.getElementById('show-login').click();
+            }
+          }, 2000);
         } else {
-          messageEl.textContent = 'Ошибка регистрации';
+          messageEl.textContent = '❌ ' + (data.message || 'Ошибка регистрации');
           messageEl.className = 'form-message error';
         }
+      })
+      .catch(error => {
+        console.error('Registration error:', error);
+        messageEl.textContent = '❌ Ошибка сети. Проверьте подключение.';
+        messageEl.className = 'form-message error';
       });
     });
   }
@@ -122,6 +141,10 @@ function setupAuthForms() {
       const password = document.getElementById('login-password').value;
       const messageEl = document.getElementById('login-message');
 
+      // ✅ Показываем загрузку
+      messageEl.textContent = 'Проверка...';
+      messageEl.className = 'form-message info';
+
       fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -129,13 +152,29 @@ function setupAuthForms() {
       })
       .then(res => res.json())
       .then(data => {
+        console.log('Login response:', data); // для отладки
+        
+        // ✅ ПРАВИЛЬНАЯ ПРОВЕРКА
         if (data.success) {
+          messageEl.textContent = '✅ ' + data.message;
+          messageEl.className = 'form-message success';
+          
+          // Сохраняем пользователя
           sessionStorage.setItem('loggedInUser', email);
-          window.location.href = 'index.html'; 
+          
+          // Перенаправляем через 1 секунду
+          setTimeout(() => {
+            window.location.href = 'index.html'; 
+          }, 1000);
         } else {
-          messageEl.textContent = 'Неверный логин или пароль';
+          messageEl.textContent = '❌ ' + (data.message || 'Неверный логин или пароль');
           messageEl.className = 'form-message error';
         }
+      })
+      .catch(error => {
+        console.error('Login error:', error);
+        messageEl.textContent = '❌ Ошибка сети. Проверьте подключение.';
+        messageEl.className = 'form-message error';
       });
     });
   }
