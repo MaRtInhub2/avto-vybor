@@ -181,6 +181,7 @@ function setupAuthForms() {
 }
 
 /* --- TRADE-IN: КРАСИВЫЙ ВЫВОД ОШИБОК ВМЕСТО ALERT --- */
+/* --- TRADE-IN: КРАСИВЫЙ ВЫВОД ОШИБОК ВМЕСТО ALERT --- */
 function setupTradeInForm() {
   const tradeInForm = document.getElementById('trade-in-form');
   if (!tradeInForm) return;
@@ -190,7 +191,7 @@ function setupTradeInForm() {
   tradeInForm.addEventListener('submit', function(event) {
     event.preventDefault();
 
-    // Сбрасываем предыдущие сообщения (очищаем блок)
+    // Сбрасываем предыдущие сообщения
     resultEl.style.display = 'none';
     resultEl.className = ''; 
     resultEl.innerHTML = '';
@@ -211,21 +212,24 @@ function setupTradeInForm() {
     // 2. ПОЛУЧЕНИЕ ДАННЫХ
     const year = parseInt(document.getElementById('trade-in-year').value);
     const mileage = parseInt(document.getElementById('trade-in-mileage').value);
-    const make = document.getElementById('trade-in-make').value;
-    const model = document.getElementById('trade-in-model').value;
-    const phone = document.getElementById('trade-in-phone').value;
+    const make = document.getElementById('trade-in-make').value.trim();
+    const model = document.getElementById('trade-in-model').value.trim();
+    const phone = document.getElementById('trade-in-phone').value.trim();
 
-    // 3. ВАЛИДАЦИЯ (ВМЕСТО ALERT)
-    // Создаем функцию для показа ошибки, чтобы не дублировать код
-    function showError(text) {
-      resultEl.style.display = 'block';
-      resultEl.className = 'error-box'; // Делаем блок красным
-      resultEl.innerHTML = `<p style="margin:0;">⚠️ <b>Ошибка:</b> ${text}</p>`;
+    // 3. ДОПОЛНИТЕЛЬНАЯ ВАЛИДАЦИЯ ДЛЯ ТЕКСТОВЫХ ПОЛЕЙ
+    if (!make || make.length < 2) {
+      showError('Укажите марку автомобиля (минимум 2 символа).');
+      return;
+    }
+
+    if (!model || model.length < 1) {
+      showError('Укажите модель автомобиля.');
+      return;
     }
 
     if (year < 1980 || year > 2025 || isNaN(year)) {
       showError('Укажите корректный год выпуска (от 1980 до 2025).');
-      return; // Останавливаем отправку
+      return;
     }
 
     if (mileage < 0 || isNaN(mileage)) {
@@ -233,8 +237,8 @@ function setupTradeInForm() {
       return;
     }
 
-    if (phone.length < 10) {
-      showError('Введите корректный номер телефона.');
+    if (!phone || phone.length < 10 || !/^[\d\s\-\+\(\)]+$/.test(phone)) {
+      showError('Введите корректный номер телефона (минимум 10 цифр).');
       return;
     }
 
@@ -246,39 +250,57 @@ function setupTradeInForm() {
     if (finalPrice < 100000) finalPrice = 100000;
     const formattedPrice = finalPrice.toLocaleString('ru-RU');
 
-    // 5. ОТПРАВКА НА СЕРВЕР
-    const formData = { make, model, year, mileage, phone, userEmail: loggedInUser };
+    // 5. ОТПРАВКА НА СЕРВЕР (ИСПРАВЛЕНО!)
+    const formData = { 
+      make, 
+      model, 
+      year, 
+      mileage, 
+      phone, 
+      user_email: loggedInUser  // ← КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ!
+    };
 
-    fetch('/api/tradein', {  // ← ИСПРАВЛЕНО: должно быть /api/tradein (без дефиса)
+    console.log('Отправляемые данные:', formData); // для отладки
+
+    fetch('/api/tradein', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
     })
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      return res.json();
+    })
     .then(data => {
-        console.log('Trade-in response:', data); // для отладки
-        
-        // ПРАВИЛЬНАЯ ПРОВЕРКА
-        if (data.success) {
-            // УСПЕХ
-            resultEl.style.display = 'block';
-            resultEl.className = 'success';
-            resultEl.innerHTML = `
-              <p>✅ <b>Заявка успешно отправлена!</b></p>
-              <p>Предварительная оценка: <strong>${formattedPrice} ₽</strong></p>
-              <p class="disclaimer">Менеджер свяжется с вами по номеру ${phone}</p>
-              ${data.requestId ? `<p><small>Номер заявки: ${data.requestId}</small></p>` : ''}
-            `;
-            tradeInForm.reset();
-        } else {
-            // ОШИБКА
-            showError(data.message || 'Не удалось отправить заявку. Попробуйте позже.');
-        }
+      console.log('Trade-in response:', data);
+      
+      if (data.success) {
+        resultEl.style.display = 'block';
+        resultEl.className = 'success';
+        resultEl.innerHTML = `
+          <p>✅ <b>Заявка успешно отправлена!</b></p>
+          <p>Предварительная оценка: <strong>${formattedPrice} ₽</strong></p>
+          <p class="disclaimer">Менеджер свяжется с вами по номеру ${phone}</p>
+          ${data.requestId ? `<p><small>Номер заявки: ${data.requestId}</small></p>` : ''}
+        `;
+        tradeInForm.reset();
+      } else {
+        showError(data.message || 'Не удалось отправить заявку. Попробуйте позже.');
+      }
     })
     .catch(err => {
-        console.error(err);
-        showError('Ошибка соединения с сервером. Попробуйте позже.');
+      console.error('Ошибка отправки:', err);
+      showError('Ошибка соединения с сервером. Попробуйте позже.');
     });
+
+    // Функция showError (должна быть объявлена выше)
+    function showError(text) {
+      resultEl.style.display = 'block';
+      resultEl.className = 'error-box';
+      resultEl.innerHTML = `<p style="margin:0;">⚠️ <b>Ошибка:</b> ${text}</p>`;
+    }
   });
 }
 
