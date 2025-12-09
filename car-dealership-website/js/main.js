@@ -84,21 +84,40 @@ function setupImageGallery() {
 
 /* --- ЧАСТЬ 1: АВТОРИЗАЦИЯ ЧЕРЕЗ БАЗУ ДАННЫХ --- */
 function setupAuthForms() {
-  
   // Регистрация
   const registerForm = document.getElementById('register-form');
   if (registerForm) {
     registerForm.addEventListener('submit', function(event) {
-      event.preventDefault(); 
-      const email = document.getElementById('register-email').value;
-      const password = document.getElementById('register-password').value;
+      event.preventDefault();
+
+      const email = document.getElementById('register-email').value.trim();
+      const password = document.getElementById('register-password').value.trim();
+      const confirmPassword = document.getElementById('register-confirm-password').value.trim();
       const messageEl = document.getElementById('register-message');
 
-      // Показываем загрузку
+      // Сбрасываем сообщение
+      messageEl.textContent = '';
+      messageEl.className = 'form-message';
+
+      // 1. Проверка совпадения паролей
+      if (password !== confirmPassword) {
+        messageEl.textContent = 'Пароли не совпадают';
+        messageEl.className = 'form-message error';
+        return; // ⛔ НЕ отправляем запрос на сервер
+      }
+
+      // 2. Доп. проверка длины пароля (клиентская, совпадает с backend)
+      if (password.length < 6) {
+        messageEl.textContent = 'Пароль должен содержать минимум 6 символов';
+        messageEl.className = 'form-message error';
+        return;
+      }
+
+      // 3. Показываем загрузку
       messageEl.textContent = 'Отправка...';
       messageEl.className = 'form-message info';
 
-      // Отправляем данные на сервер
+      // 4. Отправляем данные на сервер
       fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -106,18 +125,15 @@ function setupAuthForms() {
       })
       .then(res => res.json())
       .then(data => {
-        console.log('Registration response:', data); // для отладки
-        
-        // ПРАВИЛЬНАЯ ПРОВЕРКА
+        console.log('Registration response:', data);
+
         if (data.success) {
           messageEl.textContent = '✅ Регистрация прошла успешно!';
           messageEl.className = 'form-message success';
-          
-          // Автоматически переключаем на форму входа через 2 секунды
+
           setTimeout(() => {
-            if (document.getElementById('show-login')) {
-              document.getElementById('show-login').click();
-            }
+            const showLoginBtn = document.getElementById('show-login');
+            if (showLoginBtn) showLoginBtn.click();
           }, 2000);
         } else {
           messageEl.textContent = '❌ ' + (data.message || 'Ошибка регистрации');
