@@ -106,7 +106,7 @@ function setupAuthForms() {
         return; // ⛔ НЕ отправляем запрос на сервер
       }
 
-      // 2. Доп. проверка длины пароля (клиентская, совпадает с backend)
+      // 2. Доп. проверка длины пароля
       if (password.length < 6) {
         messageEl.textContent = 'Пароль должен содержать минимум 6 символов';
         messageEl.className = 'form-message error';
@@ -148,7 +148,7 @@ function setupAuthForms() {
     });
   }
 
-  // Вход
+  // Вход (оставь как есть, он у тебя нормальный)
   const loginForm = document.getElementById('login-form');
   if (loginForm) {
     loginForm.addEventListener('submit', function(event) {
@@ -157,7 +157,6 @@ function setupAuthForms() {
       const password = document.getElementById('login-password').value;
       const messageEl = document.getElementById('login-message');
 
-      // Показываем загрузку
       messageEl.textContent = 'Проверка...';
       messageEl.className = 'form-message info';
 
@@ -168,19 +167,14 @@ function setupAuthForms() {
       })
       .then(res => res.json())
       .then(data => {
-        console.log('Login response:', data); // для отладки
-        
-        // ПРАВИЛЬНАЯ ПРОВЕРКА
+        console.log('Login response:', data);
+
         if (data.success) {
           messageEl.textContent = '✅ Вход выполнен успешно!';
           messageEl.className = 'form-message success';
-          
-          // Сохраняем пользователя
           sessionStorage.setItem('loggedInUser', email);
-          
-          // Перенаправляем через 1 секунду
           setTimeout(() => {
-            window.location.href = 'index.html'; 
+            window.location.href = 'index.html';
           }, 1000);
         } else {
           messageEl.textContent = '❌ ' + (data.message || 'Неверный логин или пароль');
@@ -196,7 +190,8 @@ function setupAuthForms() {
   }
 }
 
-/* --- TRADE-IN: КРАСИВЫЙ ВЫВОД ОШИБОК ВМЕСТО ALERT --- */
+
+
 /* --- TRADE-IN: КРАСИВЫЙ ВЫВОД ОШИБОК ВМЕСТО ALERT --- */
 function setupTradeInForm() {
   const tradeInForm = document.getElementById('trade-in-form');
